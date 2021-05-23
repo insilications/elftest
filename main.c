@@ -12,52 +12,74 @@
 #include <rpm/rpmmacro.h>
 #include <rpm/rpmstring.h>
 #include <rpm/rpmtypes.h>
-#define true 1
-#define false 0
-#define BUFMAX 131072
+//#define true 1
+//#define false 0
+//#define BUFMAX 131072
 
 // int setenv(const char *name, const char *value, int overwrite);
-// char *rpmExpand(const char *arg, ...) RPM_GNUC_NULL_TERMINATED;
-// int rpmReadConfigFiles(const char *file, const char *target);
+char *rpmExpand(const char *arg, ...) RPM_GNUC_NULL_TERMINATED;
+int rpmExpandMacros(rpmMacroContext mc, const char *sbuf, char **obuf,
+                    int flags);
+int rpmReadConfigFiles(const char *file, const char *target);
 // const char *rpmcliRc = "/usr/lib/rpm/clr/rpmrc";
 
-static int rpmcliInitialized = -1;
+static int rpmrcInit = -1;
 
-regex_t **compRegex(const char *pattern, regex_t **regexList,
-                    int *regexListSize) {
+static regex_t **compRegex(const char *pattern, regex_t **regexList,
+                           int *regexListSize) {
 
-  regexList = xcalloc(1, (sizeof(*regexList) * 1));
-  *regexListSize = 1;
-  printf("1 (regexListSize - 1): (%d -1): %d\n", *regexListSize,
-         (*regexListSize - 1));
-  regexList[(*regexListSize - 1)] = xcalloc(1, sizeof(**regexList));
-  printf("1 regexList[0]: %p\n", regexList[0]);
-  regcomp(regexList[(*regexListSize - 1)], "/aot/intel/oneapi", REG_EXTENDED);
-  printf("1 regexListSize: %d\n", *regexListSize);
+  //  regexList = xcalloc(1, (sizeof(*regexList) * 1));
+  //  *regexListSize = 1;
+  //  printf("1 (regexListSize - 1): (%d -1): %d\n", *regexListSize,
+  //         (*regexListSize - 1));
+  //  regexList[(*regexListSize - 1)] = xcalloc(1, sizeof(**regexList));
+  //  printf("1 regexList[0]: %p\n", regexList[0]);
+  //  regcomp(regexList[(*regexListSize - 1)], "/aot/intel/oneapi",
+  //  REG_EXTENDED); printf("1 regexListSize: %d\n", *regexListSize);
 
-  *regexListSize = (*regexListSize + 1);
-  printf("2 (regexListSize - 1): (%d -1): %d\n", *regexListSize,
-         (*regexListSize - 1));
-  regexList = xrealloc(regexList, (sizeof(*regexList) * *regexListSize));
+  //  *regexListSize = (*regexListSize + 1);
+  //  printf("2 (regexListSize - 1): (%d -1): %d\n", *regexListSize,
+  //         (*regexListSize - 1));
+  //  regexList = xrealloc(regexList, (sizeof(*regexList) * *regexListSize));
 
-  regexList[(*regexListSize - 1)] = xcalloc(1, sizeof(**regexList));
-  regcomp(regexList[(*regexListSize - 1)], "/usr/nvidia", REG_EXTENDED);
-  printf("2 regexList[0]: %p\n", regexList[0]);
-  printf("2 regexList[1]: %p\n", regexList[1]);
-  printf("2 regexListSize: %d\n", *regexListSize);
+  //  regexList[(*regexListSize - 1)] = xcalloc(1, sizeof(**regexList));
+  //  regcomp(regexList[(*regexListSize - 1)], "/usr/nvidia", REG_EXTENDED);
+  //  printf("2 regexList[0]: %p\n", regexList[0]);
+  //  printf("2 regexList[1]: %p\n", regexList[1]);
+  //  printf("2 regexListSize: %d\n", *regexListSize);
 
-  *regexListSize = (*regexListSize + 1);
-  printf("3 (regexListSize - 1): (%d -1): %d\n", *regexListSize,
-         (*regexListSize - 1));
-  regexList = xrealloc(regexList, (sizeof(*regexList) * *regexListSize));
+  //  *regexListSize = (*regexListSize + 1);
+  //  printf("3 (regexListSize - 1): (%d -1): %d\n", *regexListSize,
+  //         (*regexListSize - 1));
+  //  regexList = xrealloc(regexList, (sizeof(*regexList) * *regexListSize));
 
-  regexList[(*regexListSize - 1)] = xcalloc(1, sizeof(**regexList));
-  regcomp(regexList[(*regexListSize - 1)], "/usr/local/cuda", REG_EXTENDED);
-  printf("3 regexList[0]: %p\n", regexList[0]);
-  printf("3 regexList[1]: %p\n", regexList[1]);
-  printf("3 regexList[2]: %p\n", regexList[2]);
-  printf("3 regexListSize: %d\n", *regexListSize);
+  //  regexList[(*regexListSize - 1)] = xcalloc(1, sizeof(**regexList));
+  //  regcomp(regexList[(*regexListSize - 1)], "/usr/local/cuda", REG_EXTENDED);
+  //  printf("3 regexList[0]: %p\n", regexList[0]);
+  //  printf("3 regexList[1]: %p\n", regexList[1]);
+  //  printf("3 regexList[2]: %p\n", regexList[2]);
+  //  printf("3 regexListSize: %d\n", *regexListSize);
 
+  int newRegexListSize = (*regexListSize + 1);
+  printf("newRegexListSize: (regexListSize + 1): (%d + 1) = %d\n",
+         *regexListSize, newRegexListSize);
+  printf("1\n");
+  if (newRegexListSize == 1) {
+    printf("2\n");
+    regexList = xcalloc(1, (sizeof(*regexList) * 1));
+  } else {
+    printf("3\n");
+    regexList = xrealloc(regexList, (sizeof(*regexList) * newRegexListSize));
+  }
+  printf("4\n");
+  regexList[(newRegexListSize - 1)] = xcalloc(1, sizeof(**regexList));
+  printf("5\n");
+  regcomp(regexList[(newRegexListSize - 1)], pattern, REG_EXTENDED);
+  printf("6\n");
+  *regexListSize = newRegexListSize;
+  printf("7\n");
+  printf("regexList[%d]: %p\n", (*regexListSize - 1),
+         regexList[(*regexListSize - 1)]);
   return regexList;
 }
 
@@ -74,37 +96,36 @@ int main(int argc, char **argv) {
   //  for (int i = 0; i < variableNumberOfElements; i++)
   //    orderedIds[i] = malloc((ID_LEN+1) * sizeof(char)); // yeah, I know
   //    sizeof(char) is 1, but to make it clear...
-
-  rpmcliInitialized = rpmReadConfigFiles(NULL, NULL);
+  rpmrcInit = rpmReadConfigFiles(NULL, NULL);
   regex_t **regexList;
   int regexListSize = 0;
-  //  regexList = xcalloc(1, (sizeof(*regexList) * 1));
-  //  regexListSize = 1;
-  //  printf("1 (regexListSize - 1): (%d -1): %d\n", regexListSize,
-  //         (regexListSize - 1));
-  //  regexList[(regexListSize - 1)] = xcalloc(1, sizeof(**regexList));
-  //  printf("1 regexList[0]: %p\n", regexList[0]);
-  //  regcomp(regexList[(regexListSize - 1)], "/aot/intel/oneapi",
-  //  REG_EXTENDED); printf("1 regexListSize: %d\n", regexListSize);
+  regexList = xcalloc(1, (sizeof(*regexList) * 1));
+  regexListSize = 1;
+  printf("1 (regexListSize - 1): (%d -1): %d\n", regexListSize,
+         (regexListSize - 1));
+  regexList[(regexListSize - 1)] = xcalloc(1, sizeof(**regexList));
+  printf("1 regexList[0]: %p\n", regexList[0]);
+  regcomp(regexList[(regexListSize - 1)], "/usr/nvidia", REG_EXTENDED);
+  printf("1 regexListSize: %d\n", regexListSize);
 
-  //  regexListSize = (regexListSize + 1);
-  //  printf("2 (regexListSize - 1): (%d -1): %d\n", regexListSize,
-  //         (regexListSize - 1));
-  //  regexList = xrealloc(regexList, (sizeof(*regexList) * regexListSize));
+  regexListSize = (regexListSize + 1);
+  printf("2 (regexListSize - 1): (%d -1): %d\n", regexListSize,
+         (regexListSize - 1));
+  regexList = xrealloc(regexList, (sizeof(*regexList) * regexListSize));
 
-  //  regexList[(regexListSize - 1)] = xcalloc(1, sizeof(**regexList));
-  //  regcomp(regexList[(regexListSize - 1)], "/usr/nvidia", REG_EXTENDED);
-  //  printf("2 regexList[0]: %p\n", regexList[0]);
-  //  printf("2 regexList[1]: %p\n", regexList[1]);
-  //  printf("2 regexListSize: %d\n", regexListSize);
+  regexList[(regexListSize - 1)] = xcalloc(1, sizeof(**regexList));
+  regcomp(regexList[(regexListSize - 1)], "/usr/local/cuda", REG_EXTENDED);
+  printf("2 regexList[0]: %p\n", regexList[0]);
+  printf("2 regexList[1]: %p\n", regexList[1]);
+  printf("2 regexListSize: %d\n", regexListSize);
 
-  //  regexListSize = (regexListSize + 1);
-  //  printf("3 (regexListSize - 1): (%d -1): %d\n", regexListSize,
-  //         (regexListSize - 1));
-  //  regexList = xrealloc(regexList, (sizeof(*regexList) * regexListSize));
+  regexListSize = (regexListSize + 1);
+  printf("3 (regexListSize - 1): (%d -1): %d\n", regexListSize,
+         (regexListSize - 1));
+  regexList = xrealloc(regexList, (sizeof(*regexList) * regexListSize));
 
-  //  regexList[(regexListSize - 1)] = xcalloc(1, sizeof(**regexList));
-  //  regcomp(regexList[(regexListSize - 1)], "/usr/local/cuda", REG_EXTENDED);
+  regexList[(regexListSize - 1)] = xcalloc(1, sizeof(**regexList));
+  regcomp(regexList[(regexListSize - 1)], "/aot/intel/oneapi", REG_EXTENDED);
   //  printf("3 regexList[0]: %p\n", regexList[0]);
   //  printf("3 regexList[1]: %p\n", regexList[1]);
   //  printf("3 regexList[2]: %p\n", regexList[2]);
@@ -155,7 +176,7 @@ int main(int argc, char **argv) {
     //    fprintf(stdout, "%s\n", val);
     if (strcmp(macro, val) != 0) {
       fprintf(stdout, "%s\n", val);
-      // compRegex(val, regexList, &regexListSize);
+      // regexList = compRegex(&val, regexList, &regexListSize);
       val = _free(val);
       macro = _free(macro);
 
@@ -165,10 +186,14 @@ int main(int argc, char **argv) {
       break;
     }
   }
-  regexList = compRegex("/aot/intel/oneapi", regexList, &regexListSize);
-  printf("regexListSize: %d\n", regexListSize);
 
-  if (regexec(regexList[0], "/aot/intel/oneapi", 0, NULL, 0) == 0) {
+  //  regexList = compRegex("/aot/intel/oneapi", regexList, &regexListSize);
+  printf("regexListSize: %d\n", regexListSize);
+  printf("regexList[0]: %p\n", regexList[0]);
+  printf("regexList[1]: %p\n", regexList[1]);
+  printf("regexList[2]: %p\n", regexList[2]);
+
+  if (regexec(regexList[0], "/usr/nvidia", 0, NULL, 0) == 0) {
     printf("Matched:\n");
   } else {
     printf("Not matched:\n");
@@ -178,13 +203,13 @@ int main(int argc, char **argv) {
   } else {
     printf("Not matched:\n");
   }
-  if (regexec(regexList[1], "/usr/nvidia", 0, NULL, 0) == 0) {
+  if (regexec(regexList[1], "/usr/local/cuda", 0, NULL, 0) == 0) {
     printf("Matched:\n");
   } else {
     printf("Not matched:\n");
   }
 
-  if (regexec(regexList[2], "/usr/local/cuda", 0, NULL, 0) == 0) {
+  if (regexec(regexList[2], "/aot/intel/oneapi", 0, NULL, 0) == 0) {
     printf("Matched:\n");
   } else {
     printf("Not matched:\n");
@@ -202,7 +227,14 @@ int main(int argc, char **argv) {
   _free(regexList[1]);
   _free(regexList[2]);
   _free(regexList);
-  rpmFreeRpmrc();
+
+  //  rpmFreeRpmrc();
+  //  rpmFreeMacros(NULL);
+  //  rpmFreeMacros(rpmGlobalMacroContext);
+  //  rpmFreeCrypto();
+  rpmFreeCrypto();
+  rpmcliFini(NULL);
+  rpmrcInit = -1;
 
   //  FILE *ldd;
   //  char path[PATH_MAX];
